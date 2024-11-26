@@ -1,5 +1,6 @@
 package com.oocl.springbootemployee.service;
 
+import com.oocl.springbootemployee.exception.EmployeeAgeNotValidException;
 import com.oocl.springbootemployee.model.Employee;
 import com.oocl.springbootemployee.model.Gender;
 import com.oocl.springbootemployee.repository.EmployeeRepository;
@@ -9,9 +10,9 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class EmployeeServiceTest {
     @Test
@@ -42,5 +43,17 @@ class EmployeeServiceTest {
 
         //then
         assertEquals("Lucy", createdEmployee.getName());
+    }
+
+    @Test
+    void should_throw_employee_age_not_valid_exception_when_create_employee_given_employee_with_age_is_6() {
+        // Given
+        EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
+        Employee employee = new Employee(1, "Kitty", 6, Gender.FEMALE, 8000.0);
+        EmployeeService employeeService = new EmployeeService(employeeRepository);
+        // When
+        // Then
+        assertThrows(EmployeeAgeNotValidException.class, () -> employeeService.creat(employee));
+        verify(employeeRepository, never()).addEmployee(any());
     }
 }
