@@ -1,11 +1,11 @@
 package com.oocl.springbootemployee.service;
 
-import com.oocl.springbootemployee.exception.EmployeeSalaryNotValidException;
 import com.oocl.springbootemployee.exception.EmployeeAgeNotValidException;
+import com.oocl.springbootemployee.exception.EmployeeInactiveException;
+import com.oocl.springbootemployee.exception.EmployeeSalaryNotValidException;
 import com.oocl.springbootemployee.model.Employee;
 import com.oocl.springbootemployee.model.Gender;
 import com.oocl.springbootemployee.repository.EmployeeRepository;
-import com.oocl.springbootemployee.repository.IEmployeeRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -85,7 +85,7 @@ class EmployeeServiceTest {
         assertThrows(EmployeeSalaryNotValidException.class, () -> employeeService.creat(employee));
         verify(employeeRepository, never()).addEmployee(any());
     }
-    
+
     @Test
     void should_employee_is_active_when_create_employee_given_a_employee() {
         // Given
@@ -95,6 +95,18 @@ class EmployeeServiceTest {
         employeeService.creat(employee);
         // Then
         verify(employeeRepository).addEmployee(argThat(Employee::getActive));
+    }
+
+    @Test
+    void should_throw_employee_inactive_exception_when_update_employee_given_a_inactive_employee() {
+        // Given
+        int id = 1;
+        Employee employee = new Employee(1, "Tom", 35, Gender.MALE, 300000.0, false);
+        // When
+        when(employeeRepository.getEmployeeById(any())).thenReturn(employee);
+        // Then
+        assertThrows(EmployeeInactiveException.class, () -> employeeService.update(id, employee));
+        verify(employeeRepository, never()).addEmployee(any());
     }
 
 }
