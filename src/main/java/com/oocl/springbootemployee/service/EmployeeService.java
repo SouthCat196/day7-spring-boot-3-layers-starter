@@ -27,6 +27,7 @@ public class EmployeeService {
         if (employee.getAge() > 30 && employee.getSalary() < 20000) {
             throw new EmployeeSalaryNotValidException();
         }
+        employee.setActive(true);
         return employeeRepository.addEmployee(employee);
     }
 

@@ -7,6 +7,10 @@ import com.oocl.springbootemployee.model.Gender;
 import com.oocl.springbootemployee.repository.EmployeeRepository;
 import com.oocl.springbootemployee.repository.IEmployeeRepository;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 
@@ -15,13 +19,21 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+
+@ExtendWith(MockitoExtension.class)
 class EmployeeServiceTest {
+
+    @Mock
+    protected EmployeeRepository employeeRepository;
+
+    @InjectMocks
+    protected EmployeeService employeeService;
+
     @Test
     void should_return_the_given_employees_when_getAllEmployees() {
         //given
-        IEmployeeRepository mockedEmployeeRepository = mock(IEmployeeRepository.class);
-        when(mockedEmployeeRepository.getAll()).thenReturn(List.of(new Employee(1, "Lucy", 18, Gender.FEMALE, 8000.0)));
-        EmployeeService employeeService = new EmployeeService(mockedEmployeeRepository);
+        Employee employee = new Employee(1, "Lucy", 18, Gender.FEMALE, 8000.0);
+        when(employeeRepository.getAll()).thenReturn(List.of(employee));
 
         //when
         List<Employee> allEmployees = employeeService.getAllEmployees();
@@ -34,10 +46,8 @@ class EmployeeServiceTest {
     @Test
     void should_return_the_created_employee_when_create_given_a_employee() {
         //given
-        IEmployeeRepository mockedEmployeeRepository = mock(IEmployeeRepository.class);
         Employee lucy = new Employee(1, "Lucy", 18, Gender.FEMALE, 8000.0);
-        when(mockedEmployeeRepository.addEmployee(any())).thenReturn(lucy);
-        EmployeeService employeeService = new EmployeeService(mockedEmployeeRepository);
+        when(employeeRepository.addEmployee(any())).thenReturn(lucy);
 
         //when
         Employee createdEmployee = employeeService.creat(lucy);
@@ -49,9 +59,7 @@ class EmployeeServiceTest {
     @Test
     void should_throw_employee_age_not_valid_exception_when_create_employee_given_employee_with_age_is_6() {
         // Given
-        EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
         Employee employee = new Employee(1, "Kitty", 6, Gender.FEMALE, 8000.0);
-        EmployeeService employeeService = new EmployeeService(employeeRepository);
         // When
         // Then
         assertThrows(EmployeeAgeNotValidException.class, () -> employeeService.creat(employee));
@@ -61,9 +69,7 @@ class EmployeeServiceTest {
     @Test
     void should_throw_employee_age_not_valid_exception_when_create_employee_given_employee_with_age_is_90() {
         // Given
-        EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
         Employee employee = new Employee(1, "Tom", 90, Gender.MALE, 800000.0);
-        EmployeeService employeeService = new EmployeeService(employeeRepository);
         // When
         // Then
         assertThrows(EmployeeAgeNotValidException.class, () -> employeeService.creat(employee));
@@ -73,12 +79,22 @@ class EmployeeServiceTest {
     @Test
     void should_throw_employee_age_and_salary_not_valid_exception_when_create_employee_given_employee_with_age_is_35_and_salary_is_3000() {
         // Given
-        EmployeeRepository employeeRepository = mock(EmployeeRepository.class);
         Employee employee = new Employee(1, "Tom", 35, Gender.MALE, 3000.0);
-        EmployeeService employeeService = new EmployeeService(employeeRepository);
         // When
         // Then
         assertThrows(EmployeeSalaryNotValidException.class, () -> employeeService.creat(employee));
         verify(employeeRepository, never()).addEmployee(any());
     }
+    
+    @Test
+    void should_employee_is_active_when_create_employee_given_a_employee() {
+        // Given
+        Employee employee = new Employee(1, "Tom", 35, Gender.MALE, 300000.0);
+        when(employeeRepository.addEmployee(any())).thenReturn(employee);
+        // When
+        employeeService.creat(employee);
+        // Then
+        verify(employeeRepository).addEmployee(argThat(Employee::getActive));
+    }
+
 }
