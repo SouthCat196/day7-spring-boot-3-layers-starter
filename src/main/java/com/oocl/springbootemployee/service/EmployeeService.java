@@ -20,7 +20,7 @@ public class EmployeeService {
     }
 
     public Employee creat(Employee employee) {
-        if (employee.getAge() < 18) {
+        if (employee.getAge() < 18 || employee.getAge() > 65) {
             throw new EmployeeAgeNotValidException();
         }
         return employeeRepository.addEmployee(employee);
